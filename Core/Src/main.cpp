@@ -33,10 +33,7 @@
 
 #define laki_count   1024*150/2
 #define size_laki    1024*150
-//CCMRAM    (xrw)    : ORIGIN = 0x10000000
-//#define CCM_BASE               ((uint32_t)0x10000000)
-//#define CCM_DataRead()          (*(volatile uint16_t *)) (LCD_BASE1)
-//CCM_ADD       (*(volatile uint8_t*)((uint32_t)(0x60000000)))
+
 
 /* USER CODE END PTD */
 
@@ -134,10 +131,9 @@ void readPicFromFlash(uint8_t pic_nr){
 
 #define rest_pic (150*1024 - 131072)
 #define rest0  rest_pic / 2
+#define  CCM_ADDRESS   0x10000000UL
 
-    uint32_t i, i2, blk_nr;
-
-    uint32_t CCM_ADDRESS = 0x10000000;
+    uint32_t i, blk_nr;
     uint16_t * CCM_ADD  = (uint16_t *) CCM_ADDRESS;
 
 
