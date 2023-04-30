@@ -153,7 +153,7 @@ void readPicFromFlash(uint8_t pic_nr){
 
     for(i=0;i<32768;i++)
     {
-        LCD_DataWrite((*(CCM_ADD +i)));
+        LCD_DataWrite(CCM_ADD[i]);
     }
 
     for(i=0;i<44032;i++)
