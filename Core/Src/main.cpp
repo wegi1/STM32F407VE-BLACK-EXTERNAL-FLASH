@@ -32,8 +32,11 @@
 
 
 #define laki_count   1024*150/2
-
-
+#define size_laki    1024*150
+//CCMRAM    (xrw)    : ORIGIN = 0x10000000
+//#define CCM_BASE               ((uint32_t)0x10000000)
+//#define CCM_DataRead()          (*(volatile uint16_t *)) (LCD_BASE1)
+//CCM_ADD       (*(volatile uint8_t*)((uint32_t)(0x60000000)))
 
 /* USER CODE END PTD */
 
@@ -69,7 +72,7 @@ static void MX_TIM6_Init(void);
 static void MX_CRC_Init(void);
 static void MX_SPI1_Init(void);
 /* USER CODE BEGIN PFP */
-uint16_t part[32768];
+uint16_t part[44032];
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -129,31 +132,53 @@ void showPic(uint8_t pic_nr)
 
 void readPicFromFlash(uint8_t pic_nr){
 
-    uint32_t i, i2, blk_nr;
-
-
 #define rest_pic (150*1024 - 131072)
 #define rest0  rest_pic / 2
+
+    uint32_t i, i2, blk_nr;
+
+    uint32_t CCM_ADDRESS = 0x10000000;
+    uint16_t * CCM_ADD  = (uint16_t *) CCM_ADDRESS;
+
+
+
 
     lcd_setup_picture(pic_nr);
     blk_nr = pic_nr*3;
 
+    W25qxx_ReadBlock((uint8_t*)CCM_ADD, blk_nr+0, 0,w25qxx.BlockSize);
+    W25qxx_ReadBlock((uint8_t*)&part[0], blk_nr+1, 0,w25qxx.BlockSize);
+    W25qxx_ReadBlock((uint8_t*)&part[32768], blk_nr+2, 0, rest_pic);
 
-    for(i2=0; i2<2; i2++)
+
+    for(i=0;i<32768;i++)
     {
-        W25qxx_ReadBlock((uint8_t*)&part[0], blk_nr+i2, 0,w25qxx.BlockSize);
-        for(i=0;i<32768;i++)
-        {
-            LCD_DataWrite(part[i]);
-        }
+        LCD_DataWrite((*(CCM_ADD +i)));
     }
 
-
-    W25qxx_ReadBlock((uint8_t*)&part[0], blk_nr+i2, 0, rest_pic);
-    for(i=0;i<rest0;i++)
+    for(i=0;i<44032;i++)
     {
         LCD_DataWrite(part[i]);
     }
+
+
+
+
+//    for(i2=0; i2<2; i2++)
+//    {
+//        W25qxx_ReadBlock((uint8_t*)&part[0], blk_nr+i2, 0,w25qxx.BlockSize);
+//        for(i=0;i<32768;i++)
+//        {
+//            LCD_DataWrite(part[i]);
+//        }
+//    }
+//
+//
+//    W25qxx_ReadBlock((uint8_t*)&part[0], blk_nr+i2, 0, rest_pic);
+//    for(i=0;i<rest0;i++)
+//    {
+//        LCD_DataWrite(part[i]);
+//    }
 
 }
 
@@ -251,9 +276,6 @@ int main(void)
             lcdPrintf("- ODCZYT Z EXT. SPI FLASH -\n");
             lcdPrintf("---------------------------\n");
 //for(;;){}
-            HAL_Delay(1500);
-
-
 
         }
         else {
@@ -267,9 +289,9 @@ int main(void)
         {
             for(uint8_t pic_cnt = 0; pic_cnt <7; pic_cnt++)
             {
-                lcdFillRGB(0);
+                //lcdFillRGB(0);
                 readPicFromFlash(pic_cnt);
-                HAL_Delay(3000);
+                //HAL_Delay(3000);
             }
         }
         /* USER CODE BEGIN 3 */
